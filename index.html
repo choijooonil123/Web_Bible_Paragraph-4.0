@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -67,7 +67,7 @@
     .ptoolbar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px }
     .ptoolbar .spacer { flex: 1 1 auto; }
     
-    /* ?깃꼍蹂몃Ц ?쒖떇 踰꾪듉 ?곸뿭 */
+    /* 성경본문 서식 버튼 영역 */
     .pcontent-format-toolbar {
       display: flex;
       gap: 4px;
@@ -208,7 +208,7 @@
       max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     }
 
-    /* ?뚮줈???쒖떇?대컮 */
+    /* 플로팅 서식툴바 */
     #wbp-plbar{
       position: fixed; left:0; top:0;
       transform: translate(-50%, calc(-100% - 10px));
@@ -226,7 +226,7 @@
     #wbp-plbar button:hover{ background:#273046; }
     #wbp-plbar select{ background:#1f2533; color:#e6e8ef; border:1px solid var(--border); border-radius:6px; padding:4px 6px }
 
-    /* ?댁슜 梨꾩썙吏?踰꾪듉(filled) ?쒓컖 媛뺤“ + ??ぉ蹂???*/
+    /* 내용 채워진 버튼(filled) 시각 강조 + 항목별 색 */
     .ptoolbar button.filled { color:#fff; border-width:1px; box-shadow:0 0 6px rgba(0,0,0,0.25) }
     .ptoolbar .btnSummary.filled    { background:#6a5acd; border-color:#7b68ee; }
     .ptoolbar .btnUnitCtx.filled    { background:#9370db; border-color:#b48cf0; }
@@ -234,15 +234,15 @@
     .ptoolbar .btnCommentary.filled { background:#3cb371; border-color:#58d68d; }
     .ptoolbar .sermBtn.filled       { background:#ff8c00; border-color:#ffa94d; }
     .ptoolbar button.filled::after{
-      content:"??; font-size:10px; margin-left:6px; opacity:.85; color:rgba(255,255,255,.9);
+      content:"●"; font-size:10px; margin-left:6px; opacity:.85; color:rgba(255,255,255,.9);
     }
 
-    /* ?몄쭛 紐⑤뱶 ?쒖떆(?좏깮) */
+    /* 편집 모드 표시(선택) */
     details.para .pcontent[contenteditable="true"]{
       outline: 1px dashed #3b4b7a; outline-offset: 2px;
     }
 
-    /* ===== Unit Chips (ptitle ???먮┸??踰꾪듉) ===== */
+    /* ===== Unit Chips (ptitle 옆 흐릿한 버튼) ===== */
     .unit-chips { 
       display:inline-flex !important; 
       gap:6px; 
@@ -270,7 +270,7 @@
     }
     .unit-chip:active { transform: translateY(1px); }
 
-    /* ===== Unit Editor (?ㅻⅨ履??섎떒 ?앹뾽) ===== */
+    /* ===== Unit Editor (오른쪽 하단 팝업) ===== */
     .unit-editor {
       position: fixed; right: 16px; bottom: 16px;
       width: min(520px, 92vw); height: 60vh;
@@ -298,9 +298,9 @@
       background: transparent; color: var(--text, #e6e8ef); font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans KR", monospace;
     }
 
-    summary { position: relative; } /* summary ???몃씪??諛곗튂 ?덉젙??*/
+    summary { position: relative; } /* summary 내 인라인 배치 안정화 */
 
-    /* ===== [GLOBAL BOOK CHIPS] ?ㅻ뜑 ?ㅻⅨ履?移⑹뒪 ===== */
+    /* ===== [GLOBAL BOOK CHIPS] 헤더 오른쪽 칩스 ===== */
     #globalBookChips{
       display:inline-flex;
       gap:6px;
@@ -325,7 +325,7 @@
       background: color-mix(in srgb, var(--bg,#0f1115) 85%, #fff 15%);
     }
 
-    /* ===== [BOOK-HEAD CHIPS] 梨?1??泥??⑤씫 '?ㅺ탳' ?ㅻⅨ履?移⑹뒪 ===== */
+    /* ===== [BOOK-HEAD CHIPS] 책 1장 첫 단락 '설교' 오른쪽 칩스 ===== */
 .bookhead-chips{
   display:inline-flex;
   gap:6px;
@@ -349,7 +349,7 @@
   background: color-mix(in srgb, var(--bg,#0f1115) 85%, #fff 15%);
 }
 
-/* ===== book head chips (?ㅺ탳 ?ㅻⅨ履? ===== */
+/* ===== book head chips (설교 오른쪽) ===== */
 .ptoolbar .bookhead-chips{
   display:inline-flex;
   gap:6px;
@@ -369,7 +369,7 @@
   filter: brightness(1.08);
 }
 
-/* === 踰꾪듉 湲???ш린 ?듭씪 (?댁슜?먮쫫 踰꾪듉 湲곗?) === */
+/* === 버튼 글자 크기 통일 (내용흐름 버튼 기준) === */
 .ptoolbar button,
 .ptoolbar .book-chip,
 .ptoolbar .bookhead-chips button,
@@ -390,7 +390,7 @@
 }
 
 .bookunit-btn{
-  font-size: 0.9rem;            /* ?댁슜?먮쫫 踰꾪듉 ?ш린? 鍮꾩듂?섍쾶 */
+  font-size: 0.9rem;            /* 내용흐름 버튼 크기와 비슷하게 */
   padding: 3px 8px;
   border-radius: 6px;
   border: 1px solid var(--border, #252a36);
@@ -412,82 +412,82 @@
   <header>
     <h1>Web Bible Paragraph 3.5</h1>
 
-    <div class="pill"><button id="btnSaveJSON">JSON ???/button></div>
+    <div class="pill"><button id="btnSaveJSON">JSON 저장</button></div>
 
     <div class="pill">
-      <button id="btnExportAll">?댁슜?대낫?닿린</button>
+      <button id="btnExportAll">내용내보내기</button>
       <input id="importFile" type="file" accept="application/json" style="display:none">
-      <button id="btnImportAll">?댁슜媛?몄삤湲?/button>
+      <button id="btnImportAll">내용가져오기</button>
     </div>
   </header>
 
   <div class="layout">
     <section class="card">
       <div class="scroller"><div id="tree"></div></div>
-      <div class="footer"><div class="muted" id="status">bible-paragraphs.json??遺덈윭?ㅻ뒗 以묅?/div></div>
+      <div class="footer"><div class="muted" id="status">bible-paragraphs.json을 불러오는 중…</div></div>
     </section>
   </div>
 
   <div id="modalWrap" class="modal-backdrop" aria-hidden="true">
     <div class="modal">
       <div class="head">
-        <strong id="modalTitle">?⑤씫 ?깃꼍</strong>
-        <span class="muted" id="modalRef">??/span>
+        <strong id="modalTitle">단락 성경</strong>
+        <span class="muted" id="modalRef">—</span>
         <div class="grow"></div>
-        <button id="closeModal">?リ린</button>
+        <button id="closeModal">닫기</button>
       </div>
 
       <div class="list" id="sermonList"></div>
 
-      <!-- ?⑥씪 ?몄쭛湲?-->
+      <!-- 단일 편집기 -->
       <div class="editor context-editor" id="sermonEditor" style="display:none">
         <div id="rteToolbar" class="editor-bar">
-          <button type="button" id="insertVerseBtn" title="?꾩옱 ?⑤씫???깃뎄 ?쎌엯">?깃뎄?쎌엯</button>
+          <button type="button" id="insertVerseBtn" title="현재 단락의 성구 삽입">성구삽입</button>
           <div class="grow"></div>
         </div>
 
-        <input id="sermonTitle" type="text" placeholder="?쒕ぉ" style="display:none" />
+        <input id="sermonTitle" type="text" placeholder="제목" style="display:none" />
         <div id="sermonMetaFields" style="display:none; padding: 12px; background: var(--panel, #161922); border-radius: 4px; margin-bottom: 12px;">
           <div style="margin-bottom: 12px;">
-            <label style="display: block; font-size: 12px; color: var(--muted, #9aa0ab); margin-bottom: 4px;">珥덉젏</label>
-            <input id="sermonFocus" type="text" placeholder="?ㅺ탳??珥덉젏???낅젰?섏꽭?? style="width: 100%; padding: 6px 8px; border: 1px solid var(--border, #252a36); border-radius: 4px; font-size: 14px; background: var(--bg, #0f1115); color: var(--text, #e6e8ef);" />
+            <label style="display: block; font-size: 12px; color: var(--muted, #9aa0ab); margin-bottom: 4px;">초점</label>
+            <input id="sermonFocus" type="text" placeholder="설교의 초점을 입력하세요" style="width: 100%; padding: 6px 8px; border: 1px solid var(--border, #252a36); border-radius: 4px; font-size: 14px; background: var(--bg, #0f1115); color: var(--text, #e6e8ef);" />
           </div>
           <div style="margin-bottom: 12px;">
-            <label style="display: block; font-size: 12px; color: var(--muted, #9aa0ab); margin-bottom: 4px;">?ㅼ썙??/label>
-            <input id="sermonKeywords" type="text" placeholder="?ㅼ썙?쒕? ?쇳몴濡?援щ텇?섏뿬 ?낅젰?섏꽭?? style="width: 100%; padding: 6px 8px; border: 1px solid var(--border, #252a36); border-radius: 4px; font-size: 14px; background: var(--bg, #0f1115); color: var(--text, #e6e8ef);" />
+            <label style="display: block; font-size: 12px; color: var(--muted, #9aa0ab); margin-bottom: 4px;">키워드</label>
+            <input id="sermonKeywords" type="text" placeholder="키워드를 쉼표로 구분하여 입력하세요" style="width: 100%; padding: 6px 8px; border: 1px solid var(--border, #252a36); border-radius: 4px; font-size: 14px; background: var(--bg, #0f1115); color: var(--text, #e6e8ef);" />
           </div>
           <div>
-            <label style="display: block; font-size: 12px; color: var(--muted, #9aa0ab); margin-bottom: 4px;">?곸슜???/label>
-            <input id="sermonTarget" type="text" placeholder="?곸슜??곸쓣 ?낅젰?섏꽭?? style="width: 100%; padding: 6px 8px; border: 1px solid var(--border, #252a36); border-radius: 4px; font-size: 14px; background: var(--bg, #0f1115); color: var(--text, #e6e8ef);" />
+            <label style="display: block; font-size: 12px; color: var(--muted, #9aa0ab); margin-bottom: 4px;">적용대상</label>
+            <input id="sermonTarget" type="text" placeholder="적용대상을 입력하세요" style="width: 100%; padding: 6px 8px; border: 1px solid var(--border, #252a36); border-radius: 4px; font-size: 14px; background: var(--bg, #0f1115); color: var(--text, #e6e8ef);" />
           </div>
         </div>
         <div id="sermonBody" class="rte" contenteditable="true" spellcheck="false" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"></div>
 
         <div class="editor-bar">
           <div class="grow"></div>
-          <button id="editorSpeak" class="primary">??룆</button>
-          <button id="saveSermon" class="primary">???/button>
+          <button id="editorSpeak" class="primary">낭독</button>
+          <button id="saveSermon" class="primary">저장</button>
         </div>
       </div>
 
       <div id="modalFooterNew" class="footer" style="padding:10px 14px; border-top:1px solid var(--border); display: flex; gap: 8px; justify-content: space-between; align-items: center;">
-        <button id="saveSermonListBtn" class="primary">?ㅺ탳紐⑸줉???/button>
-        <button id="newSermonBtn" class="primary">???ㅺ탳紐⑸줉</button>
+        <button id="saveSermonListBtn" class="primary">설교목록저장</button>
+        <button id="newSermonBtn" class="primary">새 설교목록</button>
       </div>
     </div>
   </div>
 
-  <!-- ?뚮줈???쒖떇?대컮(???좏깮 ???쒖떆) -->
-  <div id="wbp-plbar" hidden role="toolbar" aria-label="???쒖떇">
-    <button type="button" data-cmd="createLink" title="留곹겕 (Ctrl+K)">?뵕</button>
+  <!-- 플로팅 서식툴바(절 선택 시 표시) -->
+  <div id="wbp-plbar" hidden role="toolbar" aria-label="절 서식">
+    <button type="button" data-cmd="createLink" title="링크 (Ctrl+K)">🔗</button>
     <div class="divider"></div>
-    <!-- ?ш린 ?ㅼ뿉 7???붾젅?멸? JS濡?二쇱엯?⑸땲??-->
+    <!-- 여기 뒤에 7색 팔레트가 JS로 주입됩니다 -->
   </div>
 
-  <!-- ??蹂몄껜 -->
+  <!-- 앱 본체 -->
   <script src="app.js" defer></script>
 
-  <!-- v3.5 肄붿뼱: 1) ??μ냼 -->
+  <!-- v3.5 코어: 1) 저장소 -->
   <script>
   const WBP_FMT_KEY = 'wbps.versefmt.v2';
   const WBP_FMT = {
@@ -508,7 +508,7 @@
       } else {
         localStorage.setItem(WBP_FMT_KEY, JSON.stringify(this.map));
       }
-      // ?쒖떇 ?????踰꾪듉 ?됱긽 ?낅뜲?댄듃
+      // 서식 저장 후 버튼 색상 업데이트
       if (typeof updateButtonColors === 'function') {
         setTimeout(updateButtonColors, 100);
       }
@@ -540,29 +540,31 @@
   WBP_FMT.load();
   </script>
 
-  <!-- v3.5 肄붿뼱: 2) ?뚮뜑 ?꾨즺 蹂듭썝 + 諛깆뾽 ?듭?踰?-->
+  <!-- v3.5 코어: 2) 렌더 완료 복원 + 백업 옵저버 -->
   <script>
-  // buildTree() ?앹뿉??app.js媛 dispatch ?댁빞 ??
+  // buildTree() 끝에서 app.js가 dispatch 해야 함:
   // document.dispatchEvent(new CustomEvent('wbp:treeBuilt'));
   document.addEventListener('wbp:treeBuilt', ()=>{
     const root = document.getElementById('tree') || document;
     WBP_FMT.restoreAll(root);
 
-    // ??媛?梨낆쓽 1??泥??⑤씫 '?ㅺ탳' ?ㅻⅨ履쎌뿉 移⑹뒪 諛곗튂
+    // ✅ 각 책의 1장 첫 단락 '설교' 오른쪽에 칩스 배치
     ensureBookHeadChips();
   });
 
-  // 援ы삎/諛깆뾽: ?몃━ ?대? DOM 異붽? ???????먮룞 蹂듭썝
+  // 구형/백업: 트리 내부 DOM 추가 시 새 절 자동 복원
   (function(){
     const root = document.getElementById('tree');
     if(!root) return;
-    // 珥덇린 1???ㅼ쐲? wbp:treeBuilt ?대깽?몄뿉??泥섎━?섎?濡??쒓굅
-    // WBP_FMT.restoreAll(root); // 以묐났 ?쒓굅: 545以꾩뿉???대? 泥섎━??    let isRestoring = false; // 臾댄븳 猷⑦봽 諛⑹? ?뚮옒洹?    const mo = new MutationObserver((muts)=>{
-      if(isRestoring) return; // ?대? 蹂듭썝 以묒씠硫?臾댁떆
+    // 초기 1회 스윕은 wbp:treeBuilt 이벤트에서 처리하므로 제거
+    // WBP_FMT.restoreAll(root); // 중복 제거: 545줄에서 이미 처리됨
+    let isRestoring = false; // 무한 루프 방지 플래그
+    const mo = new MutationObserver((muts)=>{
+      if(isRestoring) return; // 이미 복원 중이면 무시
       for(const m of muts){
         m.addedNodes?.forEach?.(n=>{
           if(!(n instanceof HTMLElement)) return;
-          // 蹂듭썝 ??곸씤吏 ?뺤씤
+          // 복원 대상인지 확인
           const needsRestore = n.matches?.('.pline, .verse-line, p.verse') || 
                                n.querySelectorAll?.('.pline, .verse-line, p.verse')?.length > 0;
           if(needsRestore) {
@@ -571,7 +573,7 @@
               if(n.matches?.('.pline, .verse-line, p.verse')) WBP_FMT.restoreLine(n);
               n.querySelectorAll?.('.pline, .verse-line, p.verse')?.forEach?.(x=>WBP_FMT.restoreLine(x));
             } finally {
-              // ?ㅼ쓬 ?대깽??猷⑦봽?먯꽌 ?뚮옒洹??댁젣
+              // 다음 이벤트 루프에서 플래그 해제
               setTimeout(() => { isRestoring = false; }, 0);
             }
           }
@@ -582,13 +584,13 @@
   })();
   </script>
 
-  <!-- v3.5 肄붿뼱: 3) ?뚮줈?낇댋諛??쒖떆/?곸슜 利됱떆 ???+ 6???붾젅??-->
+  <!-- v3.5 코어: 3) 플로팅툴바 표시/적용 즉시 저장 + 6색 팔레트 -->
   <script>
   (function enableFloatingToolbar(){
     const bar = document.getElementById('wbp-plbar');
     if(!bar) return;
 
-    // 7???붾젅??二쇱엯 (?곗깋 ?ы븿, 湲고????쒕∼?ㅼ슫 ?쒓굅)
+    // 7색 팔레트 주입 (흰색 포함, 기타색 드롭다운 제거)
     (function injectPalette(){
       if(bar.querySelector('.wbp-colors')) return;
       const PALETTE = ['#ff4d4f','#faad14','#fadb14','#52c41a','#1677ff','#722ed1','#ffffff'];
@@ -597,7 +599,7 @@
       PALETTE.forEach(hex=>{
         const b = document.createElement('button');
         b.type='button'; 
-        b.title=hex === '#ffffff' ? '?곗깋' : hex; 
+        b.title=hex === '#ffffff' ? '흰색' : hex; 
         b.style.cssText=`width:22px;height:22px;border-radius:5px;border:1px solid ${hex === '#ffffff' ? '#666' : '#2a3040'};background:${hex};`;
         b.addEventListener('click', ()=>{
           document.execCommand?.('foreColor', false, hex);
@@ -608,15 +610,15 @@
       bar.appendChild(wrap);
     })();
 
-    // ?좏깮 ?쇱씤 ?먯깋
+    // 선택 라인 탐색
     function currentLineFromSelection(){
       const sel = window.getSelection?.();
       if(!sel || !sel.rangeCount) return null;
       const n = sel.getRangeAt(0).commonAncestorContainer;
       const el = (n.nodeType===1 ? n : n.parentElement);
-      // 紐⑤뱺 ?몄쭛湲곗쓽 #sermonBody ?몄떇
-      // - 梨??⑥쐞: book-basic, book-struct, book-summary
-      // - ?⑤씫 ?⑥쐞: summary, unit, whole, commentary
+      // 모든 편집기의 #sermonBody 인식
+      // - 책 단위: book-basic, book-struct, book-summary
+      // - 단락 단위: summary, unit, whole, commentary
       const sermonBody = el?.closest?.('#sermonBody');
       if (sermonBody) {
         const sermonEditor = sermonBody.closest('#sermonEditor');
@@ -624,7 +626,7 @@
           const ctxType = sermonEditor.dataset.ctxType;
           const allowedTypes = ['summary', 'unit', 'whole', 'commentary'];
           if (ctxType.startsWith('book-') || allowedTypes.includes(ctxType)) {
-            return sermonBody; // ?몄쭛湲곗뿉?쒕뒗 sermonBody 諛섑솚
+            return sermonBody; // 편집기에서는 sermonBody 반환
           }
         }
       }
@@ -656,7 +658,7 @@
       if(!hasRealSelection()){ hide(); return; }
       const line = currentLineFromSelection();
       if(!line){ hide(); return; }
-      // contenteditable 蹂댁옣(?꾩슂 ??
+      // contenteditable 보장(필요 시)
       (line.closest('.pcontent, .editor, main, body')||line).setAttribute('contenteditable','true');
       const rect = selRect(); if(!rect){ hide(); return; }
       bar.style.left = (rect.left + rect.width/2) + 'px';
@@ -666,7 +668,8 @@
     }
     function hide(){ bar.hidden = true; }
 
-    // ?대컮 湲곕낯 踰꾪듉(B/I/U/留곹겕) ???곸슜 ?????    bar.addEventListener('mousedown', e=> e.preventDefault());
+    // 툴바 기본 버튼(B/I/U/링크) → 적용 후 저장
+    bar.addEventListener('mousedown', e=> e.preventDefault());
     bar.addEventListener('click', e=>{
       const btn = e.target.closest('button'); if(!btn) return;
       const cmd = btn.dataset.cmd;
@@ -675,7 +678,7 @@
         if (cmd === 'createLink') {
           const sel = window.getSelection();
           if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
-            const url = prompt('留곹겕 URL???낅젰?섏꽭??', 'https://');
+            const url = prompt('링크 URL을 입력하세요:', 'https://');
             if (url) {
               document.execCommand('createLink', false, url);
             }
@@ -688,16 +691,17 @@
       }
     });
 
-    // ?⑥텞??(?몄뀡 ?ㅽ??? Ctrl+B/I/U/K, Ctrl+Shift+H: 湲?먯깋) ?????    document.addEventListener('keydown', (e)=>{
+    // 단축키 (노션 스타일: Ctrl+B/I/U/K, Ctrl+Shift+H: 글자색) 후 저장
+    document.addEventListener('keydown', (e)=>{
       const line = currentLineFromSelection();
       if (!line) return;
       
-      // Ctrl+Shift+H: 湲?먯깋 ?좏깮
+      // Ctrl+Shift+H: 글자색 선택
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key?.toLowerCase() === 'h') {
         e.preventDefault();
         const sel = window.getSelection();
         if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
-          // HTML5 color input ?ъ슜
+          // HTML5 color input 사용
           const colorInput = document.createElement('input');
           colorInput.type = 'color';
           colorInput.value = '#000000';
@@ -732,7 +736,7 @@
       if (k === 'k') {
         const sel = window.getSelection();
         if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
-          const url = prompt('留곹겕 URL???낅젰?섏꽭??', 'https://');
+          const url = prompt('링크 URL을 입력하세요:', 'https://');
           if (url) {
             document.execCommand('createLink', false, url);
             setTimeout(saveCurrentLine, 0);
@@ -744,11 +748,11 @@
       }
       setTimeout(showBarMaybe, 0);
     });
-    // ?낅젰/留덉슦?ㅼ뾽?먮룄 ???(臾댄븳 猷⑦봽 諛⑹?: ?붾컮?댁떛 媛뺥솕)
+    // 입력/마우스업에도 저장 (무한 루프 방지: 디바운싱 강화)
     let inputTimeout = null;
     let isSaving = false;
     document.addEventListener('input', ()=> {
-      if (isSaving) return; // ???以묒씠硫?臾댁떆
+      if (isSaving) return; // 저장 중이면 무시
       if (inputTimeout) clearTimeout(inputTimeout);
       inputTimeout = setTimeout(() => {
         isSaving = true;
@@ -758,35 +762,37 @@
           setTimeout(() => { isSaving = false; }, 50);
         }
         inputTimeout = null;
-      }, 200); // 120ms?먯꽌 200ms濡?利앷??섏뿬 臾댄븳 猷⑦봽 諛⑹?
+      }, 200); // 120ms에서 200ms로 증가하여 무한 루프 방지
     });
-    // mouseup怨?selectionchange ?대깽?몃뒗 app.js??createFloatingToolbar?먯꽌 泥섎━?섎?濡?以묐났 ?쒓굅
+    // mouseup과 selectionchange 이벤트는 app.js의 createFloatingToolbar에서 처리하므로 중복 제거
     // document.addEventListener('mouseup', ()=> setTimeout(showBarMaybe, 0));
     // document.addEventListener('selectionchange', ()=> setTimeout(showBarMaybe, 0));
     window.addEventListener('scroll', hide, {passive:true});
     window.addEventListener('resize', hide);
 
-    let isSavingLine = false; // 臾댄븳 猷⑦봽 諛⑹? ?뚮옒洹?    function saveCurrentLine(){
-      if (isSavingLine) return; // ?대? ???以묒씠硫?臾댁떆
+    let isSavingLine = false; // 무한 루프 방지 플래그
+    function saveCurrentLine(){
+      if (isSavingLine) return; // 이미 저장 중이면 무시
       const line = currentLineFromSelection(); if(!line) return;
-      // #sermonBody??寃쎌슦 WBP_FMT ??μ? ?섏? ?딆쓬 (?몄쭛湲????踰꾪듉?쇰줈 ??λ맖)
+      // #sermonBody의 경우 WBP_FMT 저장은 하지 않음 (편집기 저장 버튼으로 저장됨)
       if (line.id === 'sermonBody') {
-        // ?쒖떇? ?대? DOM???곸슜?섏뼱 ?덉쑝誘濡?蹂꾨룄 ???遺덊븘??        return;
+        // 서식은 이미 DOM에 적용되어 있으므로 별도 저장 불필요
+        return;
       }
       isSavingLine = true;
       try {
         WBP_FMT.saveLine(line);
       } finally {
-        // ?ㅼ쓬 ?대깽??猷⑦봽?먯꽌 ?뚮옒洹??댁젣
+        // 다음 이벤트 루프에서 플래그 해제
         setTimeout(() => { isSavingLine = false; }, 0);
       }
     }
   })();
   </script>
 
-  <!-- v3.5 肄붿뼱: 4) ?⑤씫 ?쒖떇 珥덇린??踰꾪듉 + filled ?곹깭 ?좉? -->
+  <!-- v3.5 코어: 4) 단락 서식 초기화 버튼 + filled 상태 토글 -->
   <script>
-  // 踰꾪듉 filled ?곹깭 媛깆떊(?댁슜?먮쫫/?⑥쐞/?꾩껜/二쇱꽍/?ㅺ탳)
+  // 버튼 filled 상태 갱신(내용흐름/단위/전체/주석/설교)
   (function filledStatePatch(){
     function safe(fn, fb){ try{ return fn(); }catch{ return fb; } }
     function paraId(book, chap, idx){
@@ -810,7 +816,7 @@
       const m = pickMeta(paraEl); if(!m) return;
       const pid = paraId(m.book, m.chap, m.idx); if(!pid) return;
 
-      // STORAGE_* ?곸닔??app.js???뺤쓽?섏뼱 ?덉쑝誘濡? ?ㅼ젣 ??媛??ъ슜 ?먮뒗 window 媛앹껜瑜??듯빐 ?묎렐
+      // STORAGE_* 상수는 app.js에 정의되어 있으므로, 실제 키 값 사용 또는 window 객체를 통해 접근
       const STORAGE_SERMON_KEY = (typeof STORAGE_SERMON !== 'undefined') ? STORAGE_SERMON : 'wbps.sermons.v4';
       const STORAGE_UNIT_CTX_KEY = (typeof STORAGE_UNIT_CTX !== 'undefined') ? STORAGE_UNIT_CTX : 'wbps.ctx.unit.v1';
       const STORAGE_WHOLE_CTX_KEY = (typeof STORAGE_WHOLE_CTX !== 'undefined') ? STORAGE_WHOLE_CTX : 'wbps.ctx.whole.v1';
@@ -847,20 +853,21 @@
       q('.btnCommentary')?.classList.toggle('filled', hasDoc(commMap, pid));
       q('.sermBtn')      ?.classList.toggle('filled', hasSermon(sermonMap, pid));
     }
-    let isSweepingFilled = false; // 臾댄븳 猷⑦봽 諛⑹? ?뚮옒洹?    function sweep(){ 
-      if(isSweepingFilled) return; // ?대? ?ㅼ쐲 以묒씠硫?臾댁떆
+    let isSweepingFilled = false; // 무한 루프 방지 플래그
+    function sweep(){ 
+      if(isSweepingFilled) return; // 이미 스윕 중이면 무시
       isSweepingFilled = true;
       try {
         document.querySelectorAll('#tree details.para').forEach(applyFilled);
       } finally {
-        // ?ㅼ쓬 ?대깽??猷⑦봽?먯꽌 ?뚮옒洹??댁젣
+        // 다음 이벤트 루프에서 플래그 해제
         setTimeout(() => { isSweepingFilled = false; }, 0);
       }
     }
 
-    // buildTree ?댄썑 媛깆떊
+    // buildTree 이후 갱신
     document.addEventListener('wbp:treeBuilt', sweep);
-    // 援ъ“ 蹂????媛깆떊
+    // 구조 변동 시 갱신
     (function(){
       const root=document.getElementById('tree'); if(!root) return;
       setTimeout(sweep, 200);
@@ -868,7 +875,7 @@
     })();
   })();
 
-  // ?⑤씫 ?쒖떇珥덇린??踰꾪듉 ?쒓굅??(?ъ슜???붿껌)
+  // 단락 서식초기화 버튼 제거됨 (사용자 요청)
   </script>
 
     <script>
@@ -877,33 +884,36 @@
       const btn = document.getElementById('btnExportAll');
       if(!btn) return;
     
-      // ?대? 諛붿씤???덈떎硫??щ컮?몃뵫 湲덉?
+      // 이미 바인딩 했다면 재바인딩 금지
       if (btn.dataset.boundExport === '1') return;
     
-      // ?뱀떆 ?몃씪??onclick???덈떎硫??쒓굅(??踰덉뿉 ??
+      // 혹시 인라인 onclick이 있다면 제거(한 번에 끝)
       if (typeof btn.onclick === 'function') btn.onclick = null;
     
-      // 湲곗〈??addEventListener濡?臾띠씤 寃??덉쓣 ???덉쑝??
-      // 踰꾪듉???대줎?믨탳泥댄븯??紐⑤뱺 ?댁쟾 由ъ뒪?덈? '珥덇린??
+      // 기존에 addEventListener로 묶인 게 있을 수 있으니,
+      // 버튼을 클론→교체하여 모든 이전 리스너를 '초기화'
       const clone = btn.cloneNode(true);
-      clone.id = 'btnExportAll';              // id ?좎?
-      clone.dataset.boundExport = '1';        // 諛붿씤???꾨즺 留덊겕
+      clone.id = 'btnExportAll';              // id 유지
+      clone.dataset.boundExport = '1';        // 바인딩 완료 마크
       btn.replaceWith(clone);
     
-      // ?댁젣遺?곕뒗 ?곕━ 履??몃뱾?щ쭔 ?곌껐?섎㈃ ??踰??ㅽ뻾 ????      window.__WBP_GET_EXPORT_BUTTON__ = () => document.getElementById('btnExportAll');
+      // 이제부터는 우리 쪽 핸들러만 연결하면 두 번 실행 안 됨
+      window.__WBP_GET_EXPORT_BUTTON__ = () => document.getElementById('btnExportAll');
     })();
     </script>
   
-    <!-- === WBP Export/Import (?덈Ц???쒖떇 ?ы븿) === -->
+    <!-- === WBP Export/Import (절문장 서식 포함) === -->
     <script>
     window.addEventListener('DOMContentLoaded', function(){
-      // ?대낫??濡쒖뺄?ㅽ넗由ъ? ???꾪꽣: ?곕━ ???ㅼ엫?ㅽ럹?댁뒪 + 諛섎뱶???ы븿?댁빞 ?섎뒗 ??      const EXPORT_PREFIXES = ['wbps.', 'WBP.', 'wbp.'];   // ?ㅼ엫?ㅽ럹?댁뒪 ?꾨━?쎌뒪
+      // 내보낼 로컬스토리지 키 필터: 우리 앱 네임스페이스 + 반드시 포함해야 하는 키
+      const EXPORT_PREFIXES = ['wbps.', 'WBP.', 'wbp.'];   // 네임스페이스 프리픽스
       const MUST_KEYS = [
-        'wbps.versefmt.v2',            // ???덈Ц???쒖떇留?        'wbps.sermons.v4',              // ?ㅺ탳 紐⑸줉
-        'wbps.ctx.unit.v1',             // ?⑥쐞?깃꼍??留λ씫
-        'wbps.ctx.whole.v1',            // ?꾩껜?깃꼍??留λ씫
-        'wbps.ctx.comm.v1',             // 二쇱꽍
-        'wbps.ctx.summary.v1'           // ?댁슜?먮쫫 ?붿빟
+        'wbps.versefmt.v2',            // ✅ 절문장 서식맵
+        'wbps.sermons.v4',              // 설교 목록
+        'wbps.ctx.unit.v1',             // 단위성경속 맥락
+        'wbps.ctx.whole.v1',            // 전체성경속 맥락
+        'wbps.ctx.comm.v1',             // 주석
+        'wbps.ctx.summary.v1'           // 내용흐름 요약
       ];
     
       function isOurKey(k){
@@ -938,11 +948,12 @@
         a.remove();
       }
     
-      // === ?대낫?닿린 踰꾪듉 ===
+      // === 내보내기 버튼 ===
   const btnExport = (window.__WBP_GET_EXPORT_BUTTON__?.() || document.getElementById('btnExportAll'));
   function handleExportClick(e){
     e.preventDefault();
-    e.stopImmediatePropagation();  // ?뱀떆 ?⑥븘?덈뒗 ?ㅻⅨ 由ъ뒪?덇? ??諛쏆? 紐삵븯寃?    const payload = {
+    e.stopImmediatePropagation();  // 혹시 남아있는 다른 리스너가 또 받지 못하게
+    const payload = {
       __type: 'WBP_EXPORT',
       __version: '3.5',
       __createdAt: new Date().toISOString(),
@@ -950,13 +961,13 @@
     };
     downloadJSON(payload);
   }
-  // 以묐났 諛⑹?: data-boundExport 泥댄겕
+  // 중복 방지: data-boundExport 체크
   if (btnExport && btnExport.dataset.boundExport !== '2') {
     btnExport.addEventListener('click', handleExportClick, {capture:true});
     btnExport.dataset.boundExport = '2';
   }
 
-  // === 媛?몄삤湲?踰꾪듉/?뚯씪 ===
+  // === 가져오기 버튼/파일 ===
   const btnImport = document.getElementById('btnImportAll');
   const fileInp   = document.getElementById('importFile');
   btnImport?.addEventListener('click', ()=> fileInp?.click());
@@ -978,12 +989,12 @@
           }
           count++;
         }
-        alert(`媛?몄삤湲??꾨즺: ${count}媛???ぉ??蹂듭썝?덉뒿?덈떎.`);
+        alert(`가져오기 완료: ${count}개 항목을 복원했습니다.`);
         document.dispatchEvent(new CustomEvent('wbp:importApplied'));
         document.dispatchEvent(new CustomEvent('wbp:treeBuilt'));
       }catch(err){
         console.error(err);
-        alert('媛?몄삤湲??ㅽ뙣: JSON ?뚯떛 ?ㅻ쪟');
+        alert('가져오기 실패: JSON 파싱 오류');
       }finally{
         e.target.value = '';
       }

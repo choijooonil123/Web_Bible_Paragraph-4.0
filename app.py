@@ -1,7 +1,8 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 from functools import lru_cache
+from math import ceil
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -16,15 +17,6 @@ from pydantic import BaseModel, Field
 ROOT = Path(__file__).parent
 DATA_PATH = ROOT / "bible-paragraphs.json"
 LOCALSTORAGE_PATH = ROOT / "data" / "localstorage.json"
-
-
-@lru_cache(maxsize=1)
-def load_raw_bible() -> Dict[str, Any]:
-    if not DATA_PATH.exists():
-        raise RuntimeError(f"데이터 파일을 찾을 수 없습니다: {DATA_PATH}")
-
-    with DATA_PATH.open("r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 def _flatten_para(book: str, chapter: int, para_idx: int, para: Dict[str, Any]) -> Dict[str, Any]:
@@ -46,8 +38,16 @@ def _flatten_para(book: str, chapter: int, para_idx: int, para: Dict[str, Any]) 
 
 
 @lru_cache(maxsize=1)
+def load_bible_raw() -> Dict[str, Any]:
+    if not DATA_PATH.exists():
+        raise RuntimeError(f"데이터 파일을 찾을 수 없습니다: {DATA_PATH}")
+    with DATA_PATH.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+@lru_cache(maxsize=1)
 def load_bible() -> Dict[str, Any]:
-    raw = load_raw_bible()
+    raw = load_bible_raw()
     books = raw.get("books", {})
     book_list: List[Dict[str, Any]] = []
     chapters_map: Dict[str, List[Dict[str, Any]]] = {}
@@ -62,16 +62,25 @@ def load_bible() -> Dict[str, Any]:
             ch_data = chapters[ch_key]
             ch_num = int(ch_key)
             para_entries: List[Dict[str, Any]] = []
+            first_ref = ""
+            first_title = ""
+
             for idx, para in enumerate(ch_data.get("paras", [])):
                 flattened = _flatten_para(book_name, ch_num, idx, para)
                 para_entries.append(flattened)
                 paras_index.append(flattened)
+                if idx == 0:
+                    first_ref = str(para.get("ref", ""))
+                    first_title = str(para.get("title", ""))
 
             chapters_map[book_name].append(
                 {
                     "chapter": ch_num,
                     "title": ch_data.get("title", ""),
                     "para_count": len(para_entries),
+                    "first_ref": first_ref,
+                    "first_title": first_title,
+                    "paras": para_entries,
                 }
             )
 
@@ -94,11 +103,10 @@ def _pick_book_and_chapter(book: str | None, chapter: int | None, data: Dict[str
 
     book_names = [b["book"] for b in data["books"]]
     selected_book = book if book in data["chapters"] else book_names[0]
-
     available_chapters = data["chapters"].get(selected_book, [])
+
     if not available_chapters:
         return selected_book, None
-
     if chapter is None:
         return selected_book, available_chapters[0]["chapter"]
 
@@ -107,7 +115,13 @@ def _pick_book_and_chapter(book: str | None, chapter: int | None, data: Dict[str
 
 
 @app.get("/py", response_class=HTMLResponse)
-async def home(request: Request, book: str | None = None, chapter: int | None = None, q: str | None = None):
+async def home(
+    request: Request,
+    book: str | None = None,
+    chapter: int | None = None,
+    q: str | None = None,
+    page: int = Query(1, ge=1),
+):
     data = load_bible()
     selected_book, selected_chapter = _pick_book_and_chapter(book, chapter, data)
     available_chapters = data["chapters"].get(selected_book, [])
@@ -115,23 +129,27 @@ async def home(request: Request, book: str | None = None, chapter: int | None = 
     results: List[Dict[str, Any]] = []
     mode = "chapter"
     query = (q or "").strip()
+    page_size = 20
+    total_count = 0
+    page_count = 0
 
     if query:
         mode = "search"
         ql = query.lower()
-        results = [
+        all_results = [
             p
             for p in data["paras_index"]
             if ql in p["text_lower"] or ql in p.get("title", "").lower() or ql in p.get("ref", "").lower()
         ]
+        total_count = len(all_results)
+        page_count = ceil(total_count / page_size) if total_count else 0
+        start = (page - 1) * page_size
+        results = all_results[start : start + page_size]
     elif selected_chapter is not None:
-        mode = "chapter"
-        raw = load_raw_bible()
-        chapter_data = raw.get("books", {}).get(selected_book, {}).get(str(selected_chapter), {})
-        results = [
-            _flatten_para(selected_book, selected_chapter, idx, para)
-            for idx, para in enumerate(chapter_data.get("paras", []))
-        ]
+        for ch in available_chapters:
+            if ch["chapter"] == selected_chapter:
+                results = ch["paras"]
+                break
 
     return templates.TemplateResponse(
         "index.html",
@@ -145,6 +163,10 @@ async def home(request: Request, book: str | None = None, chapter: int | None = 
             "query": query,
             "results": results,
             "mode": mode,
+            "page": page,
+            "page_size": page_size,
+            "total_count": total_count,
+            "page_count": page_count,
         },
     )
 
@@ -161,38 +183,37 @@ async def api_chapters(book: str):
     chapters = data["chapters"].get(book)
     if chapters is None:
         raise HTTPException(status_code=404, detail="책을 찾을 수 없습니다.")
-    return {"book": book, "chapters": chapters}
+    return {
+        "book": book,
+        "chapters": [
+            {
+                "chapter": ch["chapter"],
+                "title": ch.get("title", ""),
+                "para_count": ch.get("para_count", len(ch.get("paras", []))),
+                "first_ref": ch.get("first_ref", ""),
+                "first_title": ch.get("first_title", ""),
+            }
+            for ch in chapters
+        ],
+    }
 
 
 @app.get("/api/paragraphs/{book}/{chapter}", response_class=JSONResponse)
 async def api_paragraphs(book: str, chapter: int):
-    raw = load_raw_bible()
-    chapters = raw.get("books", {}).get(book)
-    if chapters is None:
+    raw = load_bible_raw()
+    book_data = raw.get("books", {}).get(book)
+    if book_data is None:
         raise HTTPException(status_code=404, detail="책을 찾을 수 없습니다.")
 
-    ch_data = chapters.get(str(chapter))
-    if not ch_data:
-        raise HTTPException(status_code=404, detail="장을 찾을 수 없습니다.")
-
-    paras = []
-    for idx, para in enumerate(ch_data.get("paras", [])):
-        flat = _flatten_para(book, chapter, idx, para)
-        paras.append(
-            {
-                "para_index": idx,
-                "ref": para.get("ref", ""),
-                "title": para.get("title", ""),
-                "text": flat["text"],
-                "verses": para.get("verses", []),
-            }
-        )
+    ch_data = book_data.get(str(chapter))
+    if ch_data is None:
+        raise HTTPException(status_code=404, detail="장 정보를 찾을 수 없습니다.")
 
     return {
         "book": book,
         "chapter": chapter,
         "title": ch_data.get("title", ""),
-        "paras": paras,
+        "paras": ch_data.get("paras", []),
     }
 
 
@@ -200,7 +221,7 @@ async def api_paragraphs(book: str, chapter: int):
 async def api_search(
     q: str = Query(..., min_length=1),
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=20),
+    page_size: int = Query(20, ge=1, le=100),
 ):
     data = load_bible()
     ql = q.lower()
@@ -224,7 +245,7 @@ async def api_search(
         "count": total,
         "page": page,
         "page_size": page_size,
-        "total_pages": max(1, (total + page_size - 1) // page_size),
+        "page_count": ceil(total / page_size) if total else 0,
         "results": results[start:end],
     }
 
@@ -255,7 +276,7 @@ async def save_localstorage(payload: LocalStorageSync):
     try:
         LOCALSTORAGE_PATH.write_text(json.dumps(payload.items, ensure_ascii=False, indent=2), encoding="utf-8")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"localStorage 저장 실패: {e}")
+        raise HTTPException(status_code=500, detail=f"로컬스토리지 저장 실패: {e}")
     return {"status": "ok", "saved": len(payload.items)}
 
 
