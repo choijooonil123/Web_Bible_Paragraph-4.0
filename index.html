@@ -1,0 +1,1004 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web Bible Paragraph Sermon</title>
+  <style>
+    :root{
+      --bg:#0f1115; --panel:#161922; --text:#e6e8ef; --muted:#9aa0ab;
+      --accent:#6ea8fe; --border:#252a36; --danger:#ff6b6b; --titleBlue:#9fd0ff;
+    }
+    *{ box-sizing:border-box } html,body{ height:100% }
+    body{
+      margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+      background:var(--bg); color:var(--text);
+      display:grid; grid-template-rows:64px 1fr; gap:10px;
+    }
+    header{
+      display:flex; align-items:center; gap:10px; padding:8px 10px;
+      background:var(--panel); border-bottom:1px solid var(--border);
+      position:sticky; top:0; z-index:5;
+    }
+    header h1{ font-size:16px; margin:0; font-weight:700 }
+    .muted{ color:var(--muted) }
+    .pill{
+      display:flex; gap:8px; align-items:center; border:1px solid var(--border);
+      background:color-mix(in hsl, var(--panel) 80%, black 8%); padding:6px 8px; border-radius:10px;
+    }
+    select, input[type="range"]{ background:transparent; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:4px 6px }
+    option{ color:#000 }
+    button{
+      background:color-mix(in hsl, var(--panel) 65%, black 10%); color:var(--text);
+      border:1px solid var(--border); border-radius:10px; padding:6px 10px; cursor:pointer;
+      transition:border-color .15s, transform .04s;
+    }
+    button:hover{ border-color:color-mix(in hsl, var(--border) 80%, var(--accent) 20%) }
+    button:active{ transform:translateY(1px) }
+    .primary{
+      background:linear-gradient(180deg,color-mix(in srgb, var(--accent) 75%, white 10%), color-mix(in srgb, var(--accent) 75%, black 20%));
+      border-color:color-mix(in srgb, var(--accent) 70%, black 10%);
+    }
+
+    .layout{ display:grid; grid-template-columns:1fr; gap:10px; padding:0 10px 12px }
+    .card{ background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; min-width:0 }
+    .scroller{ overflow:auto; padding:12px }
+    .footer{ padding:8px 12px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap }
+
+    #tree{ padding:8px }
+    details{
+      border:1px solid var(--border); border-radius:10px; padding:6px 8px; margin-bottom:8px;
+      background:color-mix(in hsl, var(--panel) 80%, black 8%);
+    }
+    summary{ cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px }
+    summary::-webkit-details-marker{ display:none }
+    .tw{ font-weight:700 }
+    .chapters{ display:grid; gap:6px; margin-top:6px }
+    .paras{ display:grid; gap:6px; margin:8px 0 2px }
+    .chip{
+      font-size:.92em; padding:6px 10px; border:1px solid var(--border); border-radius:999px;
+      display:inline-flex; align-items:center; gap:6px; background:color-mix(in hsl, var(--panel) 88%, black 4%); white-space:nowrap;
+    }
+    .chip:hover{ border-color:var(--accent) }
+    .ptitle{ font-weight:800; color:var(--titleBlue) }
+    .vrange{ color:var(--muted); font-weight:700 }
+
+    .pbody{ margin-top:8px; border-top:1px dashed var(--border); padding-top:8px }
+    .ptoolbar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px }
+    .ptoolbar .spacer { flex: 1 1 auto; }
+    
+    /* ?깃꼍蹂몃Ц ?쒖떇 踰꾪듉 ?곸뿭 */
+    .pcontent-format-toolbar {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      margin-left: 8px;
+    }
+    .pcontent-format-toolbar .fmt-btn {
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .pcontent-format-toolbar .fmt-btn:hover {
+      background: color-mix(in hsl, var(--panel) 85%, white 15%);
+      border-color: var(--accent);
+    }
+    .pcontent-format-toolbar .fmt-color-palette {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      margin-left: 4px;
+    }
+    .pcontent-format-toolbar .fmt-color-btn {
+      cursor: pointer;
+      border: 1px solid #2a3040;
+      border-radius: 4px;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .pcontent-format-toolbar .fmt-color-btn:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 8px rgba(110, 168, 254, 0.4);
+    }
+
+    .pline{ padding:4px 6px; border-left:3px solid transparent; border-radius:8px; transition: background .15s, border-color .15s }
+    .pline:hover{ background:color-mix(in hsl, var(--panel) 80%, black 12%) }
+    .pline.reading{ background:color-mix(in hsl, var(--accent) 15%, black 0%); border-left-color:var(--accent); position:relative }
+    .pline.reading::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent); border-radius:4px 0 0 4px; animation:pulse 1.5s ease-in-out infinite }
+    @keyframes pulse{ 0%, 100%{ opacity:1 } 50%{ opacity:0.6 } }
+    .pv{ color:var(--muted); font-size:.88em; vertical-align:super; margin-right:4px }
+
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:50 }
+    .modal{ width:min(1200px, 96vw); max-height:94vh; overflow:auto; background:var(--panel); border:1px solid var(--border); border-radius:14px }
+    .modal .head{
+      position:sticky; top:0; background:var(--panel); padding:12px 14px;
+      display:flex; gap:10px; align-items:center; border-bottom:1px solid var(--border)
+    }
+    .list{ padding:12px 14px; display:grid; gap:8px }
+    .item{ border:1px solid var(--border); border-radius:10px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap }
+    .item-title{ font-weight:700; color:var(--titleBlue); line-height:1.15; display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+    .item-title .date{ margin-left:8px; color:var(--muted); font-weight:400; font-size:.92em }
+
+    .editor{ padding:14px; display:grid; gap:12px; background:var(--panel) }
+    .editor input[type="text"], .editor textarea{ width:100%; background:#161922; color:#e6e8ef; border:1px solid #2a3040; border-radius:8px; padding:10px 12px }
+    .editor textarea{ min-height:360px; resize:vertical }
+    .editor-bar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+    .editor-bar .grow{ flex:1 1 auto }
+
+    .context-editor {
+      font-family: "Noto Serif KR", "Nanum Myeongjo", serif;
+      font-size: 1.05rem;
+      line-height: 1.85;
+      letter-spacing: 0.02em;
+      word-break: keep-all;
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+    .context-editor input[type="text"]{
+      font-family: "Noto Serif KR", "Nanum Myeongjo", serif;
+      font-weight: 600;
+      font-size: 1.12rem;
+      letter-spacing: 0.01em;
+    }
+    .context-editor .rte{
+      min-height:360px;resize:vertical;padding:14px;background:#161922;border:1px solid #2a3040;border-radius:10px;line-height:1.85;letter-spacing:.015em;caret-color:var(--accent);outline:none
+    }
+    .context-editor em,.context-editor strong,.context-editor b{
+      color:#ffd66e;font-weight:600;font-style:normal
+    }
+    .context-editor blockquote{
+      margin:12px 0;padding:10px 14px;border-left:3px solid var(--accent);
+      color:#c0cad6;font-style:italic;background:rgba(255,255,255,.04);border-radius:8px
+    }
+    .context-editor ::selection{background:rgba(110,168,254,.25)}
+    @media (max-width:640px){.context-editor{font-size:1rem}}
+    @media (prefers-color-scheme:light){
+      .context-editor{color:#1b2533;background:#fff;box-shadow:0 6px 16px rgba(0,0,0,.08)}
+      .context-editor blockquote{color:#445066;background:#f7f9fc}
+    }
+
+    #sermonEditor.context-editor .rte{
+      line-height: 1.55 !important;
+      letter-spacing: 0.01em !important;
+    }
+    #sermonEditor.context-editor .rte p{ margin: 6px 0; }
+    #sermonEditor.context-editor .rte .verse-line{ line-height: 1.5; }
+    #sermonEditor.context-editor .rte .verse-line sup{ margin-right:4px; }
+    #sermonEditor.context-editor .rte br{ line-height: 1.0; }
+
+    #sermonEditor{
+      display:flex; flex-direction:column;
+      height: calc(94vh - 56px); min-height: calc(94vh - 56px); max-height: calc(94vh - 56px);
+      overflow: hidden;
+    }
+    #sermonEditor .rte {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      padding-top: var(--editor-pad-top, 0px);
+      margin-top: 0 !important;
+      scroll-padding-top: var(--editor-pad-top, 0px);
+    }
+
+    #rteToolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .inserted-verse { font-style: italic; color: #ff8080; }
+    .verse-header { margin-bottom:2px; }
+    .verse-line { font-style: italic; color:#ff8080; }
+
+    .link-box{ display:flex; align-items:center; gap:6px; min-width:260px; flex:1 1 320px; }
+    .link-box input{
+      flex:1 1 auto; min-width:200px;
+      background:#161922;color:#e6e8ef;border:1px solid #2a3040;border-radius:8px;padding:6px 8px
+    }
+    .link-box a{
+      text-decoration:underline; color:#9fd0ff; word-break:break-all;
+      max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+
+    /* ?뚮줈???쒖떇?대컮 */
+    #wbp-plbar{
+      position: fixed; left:0; top:0;
+      transform: translate(-50%, calc(-100% - 10px));
+      background:#0f1320; border:1px solid var(--border);
+      border-radius:10px; padding:6px;
+      display:flex; gap:6px; align-items:center;
+      box-shadow:0 8px 20px rgba(0,0,0,.35); z-index:9999;
+    }
+    #wbp-plbar[hidden]{ display:none; }
+    #wbp-plbar .divider{ width:1px; height:20px; background:var(--border); }
+    #wbp-plbar button{
+      border:1px solid var(--border); background:#1f2533; color:#e6e8ef;
+      padding:6px 8px; border-radius:8px; cursor:pointer; font-weight:700;
+    }
+    #wbp-plbar button:hover{ background:#273046; }
+    #wbp-plbar select{ background:#1f2533; color:#e6e8ef; border:1px solid var(--border); border-radius:6px; padding:4px 6px }
+
+    /* ?댁슜 梨꾩썙吏?踰꾪듉(filled) ?쒓컖 媛뺤“ + ??ぉ蹂???*/
+    .ptoolbar button.filled { color:#fff; border-width:1px; box-shadow:0 0 6px rgba(0,0,0,0.25) }
+    .ptoolbar .btnSummary.filled    { background:#6a5acd; border-color:#7b68ee; }
+    .ptoolbar .btnUnitCtx.filled    { background:#9370db; border-color:#b48cf0; }
+    .ptoolbar .btnWholeCtx.filled   { background:#4682b4; border-color:#5ca5e5; }
+    .ptoolbar .btnCommentary.filled { background:#3cb371; border-color:#58d68d; }
+    .ptoolbar .sermBtn.filled       { background:#ff8c00; border-color:#ffa94d; }
+    .ptoolbar button.filled::after{
+      content:"??; font-size:10px; margin-left:6px; opacity:.85; color:rgba(255,255,255,.9);
+    }
+
+    /* ?몄쭛 紐⑤뱶 ?쒖떆(?좏깮) */
+    details.para .pcontent[contenteditable="true"]{
+      outline: 1px dashed #3b4b7a; outline-offset: 2px;
+    }
+
+    /* ===== Unit Chips (ptitle ???먮┸??踰꾪듉) ===== */
+    .unit-chips { 
+      display:inline-flex !important; 
+      gap:6px; 
+      margin-left:8px; 
+      vertical-align:middle; 
+      opacity:1 !important; 
+    }
+    .unit-chip {
+      font: 600 11px/1.8 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      padding: 0 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border, #252a36);
+      background: color-mix(in srgb, var(--bg, #0f1115) 92%, #ffffff 8%);
+      color: var(--text, #e6e8ef) !important;
+      border-color: var(--border, #252a36) !important;
+      opacity: .72;
+      transition: opacity .15s ease, color .15s ease, border-color .15s ease, background .15s ease;
+      cursor: pointer;
+    }
+    .unit-chip:hover {
+      opacity: 1;
+      color: var(--text, #e6e8ef);
+      border-color: color-mix(in srgb, var(--border, #252a36) 60%, var(--text, #e6e8ef) 40%);
+      background: color-mix(in srgb, var(--bg, #0f1115) 85%, #ffffff 15%);
+    }
+    .unit-chip:active { transform: translateY(1px); }
+
+    /* ===== Unit Editor (?ㅻⅨ履??섎떒 ?앹뾽) ===== */
+    .unit-editor {
+      position: fixed; right: 16px; bottom: 16px;
+      width: min(520px, 92vw); height: 60vh;
+      background: var(--panel, #161922);
+      border: 1px solid var(--border, #252a36);
+      border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      display: none; flex-direction: column; z-index: 100000;
+    }
+    .unit-editor header {
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      padding:10px 12px; border-bottom:1px solid var(--border, #252a36);
+    }
+    .unit-editor header .ue-title {
+      font-weight:700; color: var(--text, #e6e8ef); font-size: 13px;
+    }
+    .unit-editor .ue-actions { display:flex; gap:8px; }
+    .unit-editor .ue-actions button {
+      font-size:12px; padding:6px 10px; border-radius:8px; border:1px solid var(--border, #252a36);
+      background: color-mix(in srgb, var(--panel, #161922) 90%, #ffffff 10%);
+      color: var(--text, #e6e8ef); cursor:pointer;
+    }
+    .unit-editor .ue-actions button:hover { background: color-mix(in srgb, var(--panel, #161922) 80%, #ffffff 20%); }
+    .unit-editor textarea {
+      width: 100%; height: 100%; flex:1; resize:none; outline:none; border:0; padding:12px;
+      background: transparent; color: var(--text, #e6e8ef); font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans KR", monospace;
+    }
+
+    summary { position: relative; } /* summary ???몃씪??諛곗튂 ?덉젙??*/
+
+    /* ===== [GLOBAL BOOK CHIPS] ?ㅻ뜑 ?ㅻⅨ履?移⑹뒪 ===== */
+    #globalBookChips{
+      display:inline-flex;
+      gap:6px;
+      margin-left:8px;
+      opacity:.85;
+      align-items:center;
+    }
+    #globalBookChips .book-chip{
+      font:600 11px/1.9 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+      padding:0 10px;
+      border-radius:999px;
+      cursor:pointer;
+      border:1px solid var(--border,#252a36);
+      background: color-mix(in srgb, var(--bg,#0f1115) 92%, #fff 8%);
+      color: color-mix(in srgb, var(--text,#e6e8ef) 28%, var(--bg,#0f1115) 72%);
+      transition: background .15s ease, color .15s ease, border-color .15s ease, opacity .15s ease;
+    }
+    #globalBookChips .book-chip:hover{
+      opacity:1;
+      color:var(--text,#e6e8ef);
+      border-color: color-mix(in srgb, var(--border,#252a36) 60%, var(--text,#e6e8ef) 40%);
+      background: color-mix(in srgb, var(--bg,#0f1115) 85%, #fff 15%);
+    }
+
+    /* ===== [BOOK-HEAD CHIPS] 梨?1??泥??⑤씫 '?ㅺ탳' ?ㅻⅨ履?移⑹뒪 ===== */
+.bookhead-chips{
+  display:inline-flex;
+  gap:6px;
+  margin-left:8px;
+  vertical-align:middle;
+}
+.bookhead-chips .book-chip{
+  font:600 11px/1.9 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+  padding:0 10px;
+  border-radius:999px;
+  cursor:pointer;
+  border:1px solid var(--border,#252a36);
+  background: color-mix(in srgb, var(--bg,#0f1115) 92%, #fff 8%);
+  color: color-mix(in srgb, var(--text,#e6e8ef) 28%, var(--bg,#0f1115) 72%);
+  transition: background .15s ease, color .15s ease, border-color .15s ease, opacity .15s ease;
+}
+.bookhead-chips .book-chip:hover{
+  opacity:1;
+  color:var(--text,#e6e8ef);
+  border-color: color-mix(in srgb, var(--border,#252a36) 60%, var(--text,#e6e8ef) 40%);
+  background: color-mix(in srgb, var(--bg,#0f1115) 85%, #fff 15%);
+}
+
+/* ===== book head chips (?ㅺ탳 ?ㅻⅨ履? ===== */
+.ptoolbar .bookhead-chips{
+  display:inline-flex;
+  gap:6px;
+  margin-left:8px;
+  opacity:.9;
+}
+.ptoolbar .bookhead-chips .book-chip{
+  font: inherit;
+  padding: 4px 8px;
+  border: 1px solid var(--border,#252a36);
+  background: var(--panel,#161922);
+  color: var(--text,#e6e8ef);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ptoolbar .bookhead-chips .book-chip:hover{
+  filter: brightness(1.08);
+}
+
+/* === 踰꾪듉 湲???ш린 ?듭씪 (?댁슜?먮쫫 踰꾪듉 湲곗?) === */
+.ptoolbar button,
+.ptoolbar .book-chip,
+.ptoolbar .bookhead-chips button,
+.ptoolbar .chip {
+  font-size: 0.9rem !important;
+  line-height: 1.2 !important;
+}
+
+.bookunit-wrap{
+  margin-left: 8px;
+  display: inline-flex;
+  gap: 4px;
+  opacity: 0.8;
+}
+
+.bookunit-wrap:hover{
+  opacity: 1;
+}
+
+.bookunit-btn{
+  font-size: 0.9rem;            /* ?댁슜?먮쫫 踰꾪듉 ?ш린? 鍮꾩듂?섍쾶 */
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #252a36);
+  background: transparent;
+  color: var(--muted, #9aa0ab);
+  cursor: pointer;
+}
+
+.bookunit-btn:hover{
+  background: var(--panel, #161922);
+  color: var(--text, #e6e8ef);
+}
+
+  </style>
+
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Nanum+Myeongjo&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <h1>Web Bible Paragraph 3.5</h1>
+
+    <div class="pill" style="flex:1 1 420px; min-width:280px;">
+      <input id="searchInput" type="search" placeholder="본문 검색" style="flex:1 1 auto; min-width:0; background:transparent; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px 8px;">
+      <button id="btnSearch" class="primary">검색</button>
+      <button id="btnBrowse">본문 보기</button>
+    </div>
+
+    <div class="pill"><button id="btnSaveJSON">JSON ???/button></div>
+
+    <div class="pill">
+      <button id="btnExportAll">?댁슜?대낫?닿린</button>
+      <input id="importFile" type="file" accept="application/json" style="display:none">
+      <button id="btnImportAll">?댁슜媛?몄삤湲?/button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="card">
+      <div class="scroller"><div id="tree"></div></div>
+      <div class="footer"><div class="muted" id="status">bible-paragraphs.json??遺덈윭?ㅻ뒗 以묅?/div></div>
+    </section>
+  </div>
+
+  <div id="modalWrap" class="modal-backdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="head">
+        <strong id="modalTitle">?⑤씫 ?깃꼍</strong>
+        <span class="muted" id="modalRef">??/span>
+        <div class="grow"></div>
+        <button id="closeModal">?リ린</button>
+      </div>
+
+      <div class="list" id="sermonList"></div>
+
+      <!-- ?⑥씪 ?몄쭛湲?-->
+      <div class="editor context-editor" id="sermonEditor" style="display:none">
+        <div id="rteToolbar" class="editor-bar">
+          <button type="button" id="insertVerseBtn" title="?꾩옱 ?⑤씫???깃뎄 ?쎌엯">?깃뎄?쎌엯</button>
+          <div class="grow"></div>
+        </div>
+
+        <input id="sermonTitle" type="text" placeholder="?쒕ぉ" style="display:none" />
+        <div id="sermonMetaFields" style="display:none; padding: 12px; background: var(--panel, #161922); border-radius: 4px; margin-bottom: 12px;">
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; font-size: 12px; color: var(--muted, #9aa0ab); margin-bottom: 4px;">珥덉젏</label>
+            <input id="sermonFocus" type="text" placeholder="?ㅺ탳??珥덉젏???낅젰?섏꽭?? style="width: 100%; padding: 6px 8px; border: 1px solid var(--border, #252a36); border-radius: 4px; font-size: 14px; background: var(--bg, #0f1115); color: var(--text, #e6e8ef);" />
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; font-size: 12px; color: var(--muted, #9aa0ab); margin-bottom: 4px;">?ㅼ썙??/label>
+            <input id="sermonKeywords" type="text" placeholder="?ㅼ썙?쒕? ?쇳몴濡?援щ텇?섏뿬 ?낅젰?섏꽭?? style="width: 100%; padding: 6px 8px; border: 1px solid var(--border, #252a36); border-radius: 4px; font-size: 14px; background: var(--bg, #0f1115); color: var(--text, #e6e8ef);" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: var(--muted, #9aa0ab); margin-bottom: 4px;">?곸슜???/label>
+            <input id="sermonTarget" type="text" placeholder="?곸슜??곸쓣 ?낅젰?섏꽭?? style="width: 100%; padding: 6px 8px; border: 1px solid var(--border, #252a36); border-radius: 4px; font-size: 14px; background: var(--bg, #0f1115); color: var(--text, #e6e8ef);" />
+          </div>
+        </div>
+        <div id="sermonBody" class="rte" contenteditable="true" spellcheck="false" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"></div>
+
+        <div class="editor-bar">
+          <div class="grow"></div>
+          <button id="editorSpeak" class="primary">??룆</button>
+          <button id="saveSermon" class="primary">???/button>
+        </div>
+      </div>
+
+      <div id="modalFooterNew" class="footer" style="padding:10px 14px; border-top:1px solid var(--border); display: flex; gap: 8px; justify-content: space-between; align-items: center;">
+        <button id="saveSermonListBtn" class="primary">?ㅺ탳紐⑸줉???/button>
+        <button id="newSermonBtn" class="primary">???ㅺ탳紐⑸줉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ?뚮줈???쒖떇?대컮(???좏깮 ???쒖떆) -->
+  <div id="wbp-plbar" hidden role="toolbar" aria-label="???쒖떇">
+    <button type="button" data-cmd="createLink" title="留곹겕 (Ctrl+K)">?뵕</button>
+    <div class="divider"></div>
+    <!-- ?ш린 ?ㅼ뿉 7???붾젅?멸? JS濡?二쇱엯?⑸땲??-->
+  </div>
+
+  <!-- ??蹂몄껜 -->
+  <script src="app.js" defer></script>
+
+  <!-- v3.5 肄붿뼱: 1) ??μ냼 -->
+  <script>
+  const WBP_FMT_KEY = 'wbps.versefmt.v2';
+  const WBP_FMT = {
+    map: {},
+    load(){
+      try { 
+        if (typeof loadState === 'function') {
+          this.map = loadState(WBP_FMT_KEY, {});
+        } else {
+          this.map = JSON.parse(localStorage.getItem(WBP_FMT_KEY) || '{}');
+        }
+      }
+      catch { this.map = {}; }
+    },
+    save(){ 
+      if (typeof saveState === 'function') {
+        saveState(WBP_FMT_KEY, this.map);
+      } else {
+        localStorage.setItem(WBP_FMT_KEY, JSON.stringify(this.map));
+      }
+      // ?쒖떇 ?????踰꾪듉 ?됱긽 ?낅뜲?댄듃
+      if (typeof updateButtonColors === 'function') {
+        setTimeout(updateButtonColors, 100);
+      }
+    },
+    keyForLine(line){
+      try{
+        const para = line.closest('details.para'); if(!para) return null;
+        const t = para.querySelector('summary .ptitle'); if(!t) return null;
+        const book = t.dataset.book, ch = +t.dataset.ch, idx = +t.dataset.idx;
+        const paraData = window.BIBLE?.books?.[book]?.[ch]?.paras?.[idx]; if(!paraData) return null;
+        const v = line.dataset.verse || line.getAttribute('data-verse'); if(!v) return null;
+        return `${book}|${ch}|${paraData.ref}|v${v}`;
+      }catch{ return null; }
+    },
+    saveLine(line){
+      const k = this.keyForLine(line); if(!k) return;
+      this.map[k] = line.innerHTML;
+      this.save();
+    },
+    restoreLine(line){
+      const k = this.keyForLine(line); if(!k) return;
+      const html = this.map[k];
+      if (html) line.innerHTML = html;
+    },
+    restoreAll(root=document){
+      root.querySelectorAll('.pline, .verse-line, p.verse').forEach(el=>this.restoreLine(el));
+    }
+  };
+  WBP_FMT.load();
+  </script>
+
+  <!-- v3.5 肄붿뼱: 2) ?뚮뜑 ?꾨즺 蹂듭썝 + 諛깆뾽 ?듭?踰?-->
+  <script>
+  // buildTree() ?앹뿉??app.js媛 dispatch ?댁빞 ??
+  // document.dispatchEvent(new CustomEvent('wbp:treeBuilt'));
+  document.addEventListener('wbp:treeBuilt', ()=>{
+    const root = document.getElementById('tree') || document;
+    WBP_FMT.restoreAll(root);
+
+    // ??媛?梨낆쓽 1??泥??⑤씫 '?ㅺ탳' ?ㅻⅨ履쎌뿉 移⑹뒪 諛곗튂
+    ensureBookHeadChips();
+  });
+
+  // 援ы삎/諛깆뾽: ?몃━ ?대? DOM 異붽? ???????먮룞 蹂듭썝
+  (function(){
+    const root = document.getElementById('tree');
+    if(!root) return;
+    // 珥덇린 1???ㅼ쐲? wbp:treeBuilt ?대깽?몄뿉??泥섎━?섎?濡??쒓굅
+    // WBP_FMT.restoreAll(root); // 以묐났 ?쒓굅: 545以꾩뿉???대? 泥섎━??    let isRestoring = false; // 臾댄븳 猷⑦봽 諛⑹? ?뚮옒洹?    const mo = new MutationObserver((muts)=>{
+      if(isRestoring) return; // ?대? 蹂듭썝 以묒씠硫?臾댁떆
+      for(const m of muts){
+        m.addedNodes?.forEach?.(n=>{
+          if(!(n instanceof HTMLElement)) return;
+          // 蹂듭썝 ??곸씤吏 ?뺤씤
+          const needsRestore = n.matches?.('.pline, .verse-line, p.verse') || 
+                               n.querySelectorAll?.('.pline, .verse-line, p.verse')?.length > 0;
+          if(needsRestore) {
+            isRestoring = true;
+            try {
+              if(n.matches?.('.pline, .verse-line, p.verse')) WBP_FMT.restoreLine(n);
+              n.querySelectorAll?.('.pline, .verse-line, p.verse')?.forEach?.(x=>WBP_FMT.restoreLine(x));
+            } finally {
+              // ?ㅼ쓬 ?대깽??猷⑦봽?먯꽌 ?뚮옒洹??댁젣
+              setTimeout(() => { isRestoring = false; }, 0);
+            }
+          }
+        });
+      }
+    });
+    mo.observe(root, {subtree:true, childList:true});
+  })();
+  </script>
+
+  <!-- v3.5 肄붿뼱: 3) ?뚮줈?낇댋諛??쒖떆/?곸슜 利됱떆 ???+ 6???붾젅??-->
+  <script>
+  (function enableFloatingToolbar(){
+    const bar = document.getElementById('wbp-plbar');
+    if(!bar) return;
+
+    // 7???붾젅??二쇱엯 (?곗깋 ?ы븿, 湲고????쒕∼?ㅼ슫 ?쒓굅)
+    (function injectPalette(){
+      if(bar.querySelector('.wbp-colors')) return;
+      const PALETTE = ['#ff4d4f','#faad14','#fadb14','#52c41a','#1677ff','#722ed1','#ffffff'];
+      const wrap = document.createElement('div');
+      wrap.className = 'wbp-colors';
+      PALETTE.forEach(hex=>{
+        const b = document.createElement('button');
+        b.type='button'; 
+        b.title=hex === '#ffffff' ? '?곗깋' : hex; 
+        b.style.cssText=`width:22px;height:22px;border-radius:5px;border:1px solid ${hex === '#ffffff' ? '#666' : '#2a3040'};background:${hex};`;
+        b.addEventListener('click', ()=>{
+          document.execCommand?.('foreColor', false, hex);
+          saveCurrentLine();
+        });
+        wrap.appendChild(b);
+      });
+      bar.appendChild(wrap);
+    })();
+
+    // ?좏깮 ?쇱씤 ?먯깋
+    function currentLineFromSelection(){
+      const sel = window.getSelection?.();
+      if(!sel || !sel.rangeCount) return null;
+      const n = sel.getRangeAt(0).commonAncestorContainer;
+      const el = (n.nodeType===1 ? n : n.parentElement);
+      // 紐⑤뱺 ?몄쭛湲곗쓽 #sermonBody ?몄떇
+      // - 梨??⑥쐞: book-basic, book-struct, book-summary
+      // - ?⑤씫 ?⑥쐞: summary, unit, whole, commentary
+      const sermonBody = el?.closest?.('#sermonBody');
+      if (sermonBody) {
+        const sermonEditor = sermonBody.closest('#sermonEditor');
+        if (sermonEditor && sermonEditor.dataset.ctxType) {
+          const ctxType = sermonEditor.dataset.ctxType;
+          const allowedTypes = ['summary', 'unit', 'whole', 'commentary'];
+          if (ctxType.startsWith('book-') || allowedTypes.includes(ctxType)) {
+            return sermonBody; // ?몄쭛湲곗뿉?쒕뒗 sermonBody 諛섑솚
+          }
+        }
+      }
+      return el?.closest?.('.pline, .verse-line, p.verse') || null;
+    }
+    function hasRealSelection(){
+      const sel = window.getSelection?.();
+      return !!(sel && sel.rangeCount && !sel.getRangeAt(0).collapsed);
+    }
+    function selRect(){
+      const sel = window.getSelection();
+      if(!sel || sel.rangeCount===0) return null;
+      const r = sel.getRangeAt(0).cloneRange();
+      let rect = r.getBoundingClientRect();
+      if(!rect || (rect.width===0 && rect.height===0)){
+        const span = document.createElement('span');
+        span.appendChild(document.createTextNode('\u200b'));
+        r.insertNode(span);
+        rect = span.getBoundingClientRect();
+        span.remove();
+      }
+      return rect;
+    }
+    let savedRange=null;
+    function saveSel(){ const s=window.getSelection(); if(s&&s.rangeCount>0) savedRange=s.getRangeAt(0).cloneRange(); }
+    function restoreSel(){ if(!savedRange) return false; const s=window.getSelection(); s.removeAllRanges(); s.addRange(savedRange); return true; }
+
+    function showBarMaybe(){
+      if(!hasRealSelection()){ hide(); return; }
+      const line = currentLineFromSelection();
+      if(!line){ hide(); return; }
+      // contenteditable 蹂댁옣(?꾩슂 ??
+      (line.closest('.pcontent, .editor, main, body')||line).setAttribute('contenteditable','true');
+      const rect = selRect(); if(!rect){ hide(); return; }
+      bar.style.left = (rect.left + rect.width/2) + 'px';
+      bar.style.top  = rect.top + 'px';
+      bar.hidden = false;
+      saveSel();
+    }
+    function hide(){ bar.hidden = true; }
+
+    // ?대컮 湲곕낯 踰꾪듉(B/I/U/留곹겕) ???곸슜 ?????    bar.addEventListener('mousedown', e=> e.preventDefault());
+    bar.addEventListener('click', e=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const cmd = btn.dataset.cmd;
+      if(cmd){
+        if(!restoreSel()) return;
+        if (cmd === 'createLink') {
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+            const url = prompt('留곹겕 URL???낅젰?섏꽭??', 'https://');
+            if (url) {
+              document.execCommand('createLink', false, url);
+            }
+          }
+        } else {
+          document.execCommand(cmd, false, null);
+        }
+        setTimeout(saveCurrentLine, 0);
+        setTimeout(showBarMaybe, 0);
+      }
+    });
+
+    // ?⑥텞??(?몄뀡 ?ㅽ??? Ctrl+B/I/U/K, Ctrl+Shift+H: 湲?먯깋) ?????    document.addEventListener('keydown', (e)=>{
+      const line = currentLineFromSelection();
+      if (!line) return;
+      
+      // Ctrl+Shift+H: 湲?먯깋 ?좏깮
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key?.toLowerCase() === 'h') {
+        e.preventDefault();
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+          // HTML5 color input ?ъ슜
+          const colorInput = document.createElement('input');
+          colorInput.type = 'color';
+          colorInput.value = '#000000';
+          colorInput.style.position = 'fixed';
+          colorInput.style.opacity = '0';
+          colorInput.style.pointerEvents = 'none';
+          document.body.appendChild(colorInput);
+          
+          colorInput.addEventListener('change', () => {
+            document.execCommand('foreColor', false, colorInput.value);
+            document.body.removeChild(colorInput);
+            setTimeout(saveCurrentLine, 0);
+            setTimeout(showBarMaybe, 0);
+          });
+          
+          colorInput.addEventListener('blur', () => {
+            if (document.body.contains(colorInput)) {
+              document.body.removeChild(colorInput);
+            }
+          });
+          
+          colorInput.click();
+        }
+        return;
+      }
+      
+      // Ctrl+B/I/U/K
+      if(!(e.ctrlKey||e.metaKey) || e.shiftKey) return;
+      const k = e.key?.toLowerCase();
+      if(!['b','i','u','k'].includes(k)) return;
+      e.preventDefault();
+      if (k === 'k') {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+          const url = prompt('留곹겕 URL???낅젰?섏꽭??', 'https://');
+          if (url) {
+            document.execCommand('createLink', false, url);
+            setTimeout(saveCurrentLine, 0);
+          }
+        }
+      } else {
+        document.execCommand(k === 'b' ? 'bold' : k === 'i' ? 'italic' : 'underline', false, null);
+        setTimeout(saveCurrentLine, 0);
+      }
+      setTimeout(showBarMaybe, 0);
+    });
+    // ?낅젰/留덉슦?ㅼ뾽?먮룄 ???(臾댄븳 猷⑦봽 諛⑹?: ?붾컮?댁떛 媛뺥솕)
+    let inputTimeout = null;
+    let isSaving = false;
+    document.addEventListener('input', ()=> {
+      if (isSaving) return; // ???以묒씠硫?臾댁떆
+      if (inputTimeout) clearTimeout(inputTimeout);
+      inputTimeout = setTimeout(() => {
+        isSaving = true;
+        try {
+          saveCurrentLine();
+        } finally {
+          setTimeout(() => { isSaving = false; }, 50);
+        }
+        inputTimeout = null;
+      }, 200); // 120ms?먯꽌 200ms濡?利앷??섏뿬 臾댄븳 猷⑦봽 諛⑹?
+    });
+    // mouseup怨?selectionchange ?대깽?몃뒗 app.js??createFloatingToolbar?먯꽌 泥섎━?섎?濡?以묐났 ?쒓굅
+    // document.addEventListener('mouseup', ()=> setTimeout(showBarMaybe, 0));
+    // document.addEventListener('selectionchange', ()=> setTimeout(showBarMaybe, 0));
+    window.addEventListener('scroll', hide, {passive:true});
+    window.addEventListener('resize', hide);
+
+    let isSavingLine = false; // 臾댄븳 猷⑦봽 諛⑹? ?뚮옒洹?    function saveCurrentLine(){
+      if (isSavingLine) return; // ?대? ???以묒씠硫?臾댁떆
+      const line = currentLineFromSelection(); if(!line) return;
+      // #sermonBody??寃쎌슦 WBP_FMT ??μ? ?섏? ?딆쓬 (?몄쭛湲????踰꾪듉?쇰줈 ??λ맖)
+      if (line.id === 'sermonBody') {
+        // ?쒖떇? ?대? DOM???곸슜?섏뼱 ?덉쑝誘濡?蹂꾨룄 ???遺덊븘??        return;
+      }
+      isSavingLine = true;
+      try {
+        WBP_FMT.saveLine(line);
+      } finally {
+        // ?ㅼ쓬 ?대깽??猷⑦봽?먯꽌 ?뚮옒洹??댁젣
+        setTimeout(() => { isSavingLine = false; }, 0);
+      }
+    }
+  })();
+  </script>
+
+  <!-- v3.5 肄붿뼱: 4) ?⑤씫 ?쒖떇 珥덇린??踰꾪듉 + filled ?곹깭 ?좉? -->
+  <script>
+  // 踰꾪듉 filled ?곹깭 媛깆떊(?댁슜?먮쫫/?⑥쐞/?꾩껜/二쇱꽍/?ㅺ탳)
+  (function filledStatePatch(){
+    function safe(fn, fb){ try{ return fn(); }catch{ return fb; } }
+    function paraId(book, chap, idx){
+      const para = safe(()=>BIBLE.books[book][chap].paras[idx], null);
+      return para ? `${book}|${chap}|${para.ref}` : null;
+    }
+    function pickMeta(paraEl){
+      const t = paraEl.querySelector('summary .ptitle'); if(!t) return null;
+      return { book:t.dataset.book, chap:+t.dataset.ch, idx:+t.dataset.idx };
+    }
+    function hasDoc(map, pid){
+      const d=(map||{})[pid]; if(!d) return false;
+      const b=(d.body||'').replace(/\s+/g,''); const ti=(d.title||'').replace(/\s+/g,'');
+      return !!(b||ti);
+    }
+    function hasSermon(sermonMap, pid){
+      const arr=(sermonMap||{})[pid]||[]; if(!Array.isArray(arr)||arr.length===0) return false;
+      return arr.some(it=> (it.body||'').replace(/\s+/g,'') || (it.title||'').replace(/\s+/g,''));
+    }
+    function applyFilled(paraEl){
+      const m = pickMeta(paraEl); if(!m) return;
+      const pid = paraId(m.book, m.chap, m.idx); if(!pid) return;
+
+      // STORAGE_* ?곸닔??app.js???뺤쓽?섏뼱 ?덉쑝誘濡? ?ㅼ젣 ??媛??ъ슜 ?먮뒗 window 媛앹껜瑜??듯빐 ?묎렐
+      const STORAGE_SERMON_KEY = (typeof STORAGE_SERMON !== 'undefined') ? STORAGE_SERMON : 'wbps.sermons.v4';
+      const STORAGE_UNIT_CTX_KEY = (typeof STORAGE_UNIT_CTX !== 'undefined') ? STORAGE_UNIT_CTX : 'wbps.ctx.unit.v1';
+      const STORAGE_WHOLE_CTX_KEY = (typeof STORAGE_WHOLE_CTX !== 'undefined') ? STORAGE_WHOLE_CTX : 'wbps.ctx.whole.v1';
+      const STORAGE_COMMENTARY_KEY = (typeof STORAGE_COMMENTARY !== 'undefined') ? STORAGE_COMMENTARY : 'wbps.ctx.comm.v1';
+      const STORAGE_SUMMARY_KEY = (typeof STORAGE_SUMMARY !== 'undefined') ? STORAGE_SUMMARY : 'wbps.ctx.summary.v1';
+
+      const sermonMap = safe(()=>{
+        if (typeof loadState === 'function') return loadState(STORAGE_SERMON_KEY, {});
+        return JSON.parse(localStorage.getItem(STORAGE_SERMON_KEY)||'{}');
+      },{});
+      const unitMap   = safe(()=>{
+        if (typeof loadState === 'function') return loadState(STORAGE_UNIT_CTX_KEY, {});
+        return JSON.parse(localStorage.getItem(STORAGE_UNIT_CTX_KEY)||'{}');
+      },{});
+      const wholeMap  = safe(()=>{
+        if (typeof loadState === 'function') return loadState(STORAGE_WHOLE_CTX_KEY, {});
+        return JSON.parse(localStorage.getItem(STORAGE_WHOLE_CTX_KEY)||'{}');
+      },{});
+      const commMap   = safe(()=>{
+        if (typeof loadState === 'function') return loadState(STORAGE_COMMENTARY_KEY, {});
+        return JSON.parse(localStorage.getItem(STORAGE_COMMENTARY_KEY)||'{}');
+      },{});
+      const sumMap    = safe(()=>{
+        if (typeof loadState === 'function') return loadState(STORAGE_SUMMARY_KEY, {});
+        return JSON.parse(localStorage.getItem(STORAGE_SUMMARY_KEY)||'{}');
+      },{});
+
+      const tb = paraEl.querySelector('.ptoolbar'); if(!tb) return;
+      const q = s=>tb.querySelector(s);
+
+      q('.btnSummary')   ?.classList.toggle('filled', hasDoc(sumMap,  pid));
+      q('.btnUnitCtx')   ?.classList.toggle('filled', hasDoc(unitMap, pid));
+      q('.btnWholeCtx')  ?.classList.toggle('filled', hasDoc(wholeMap,pid));
+      q('.btnCommentary')?.classList.toggle('filled', hasDoc(commMap, pid));
+      q('.sermBtn')      ?.classList.toggle('filled', hasSermon(sermonMap, pid));
+    }
+    let isSweepingFilled = false; // 臾댄븳 猷⑦봽 諛⑹? ?뚮옒洹?    function sweep(){ 
+      if(isSweepingFilled) return; // ?대? ?ㅼ쐲 以묒씠硫?臾댁떆
+      isSweepingFilled = true;
+      try {
+        document.querySelectorAll('#tree details.para').forEach(applyFilled);
+      } finally {
+        // ?ㅼ쓬 ?대깽??猷⑦봽?먯꽌 ?뚮옒洹??댁젣
+        setTimeout(() => { isSweepingFilled = false; }, 0);
+      }
+    }
+
+    // buildTree ?댄썑 媛깆떊
+    document.addEventListener('wbp:treeBuilt', sweep);
+    // 援ъ“ 蹂????媛깆떊
+    (function(){
+      const root=document.getElementById('tree'); if(!root) return;
+      setTimeout(sweep, 200);
+      new MutationObserver(()=>sweep()).observe(root, {subtree:true, childList:true});
+    })();
+  })();
+
+  // ?⑤씫 ?쒖떇珥덇린??踰꾪듉 ?쒓굅??(?ъ슜???붿껌)
+  </script>
+
+    <script>
+    // === Export handler dedupe guard ===
+    (function ensureSingleExportHandler(){
+      const btn = document.getElementById('btnExportAll');
+      if(!btn) return;
+    
+      // ?대? 諛붿씤???덈떎硫??щ컮?몃뵫 湲덉?
+      if (btn.dataset.boundExport === '1') return;
+    
+      // ?뱀떆 ?몃씪??onclick???덈떎硫??쒓굅(??踰덉뿉 ??
+      if (typeof btn.onclick === 'function') btn.onclick = null;
+    
+      // 湲곗〈??addEventListener濡?臾띠씤 寃??덉쓣 ???덉쑝??
+      // 踰꾪듉???대줎?믨탳泥댄븯??紐⑤뱺 ?댁쟾 由ъ뒪?덈? '珥덇린??
+      const clone = btn.cloneNode(true);
+      clone.id = 'btnExportAll';              // id ?좎?
+      clone.dataset.boundExport = '1';        // 諛붿씤???꾨즺 留덊겕
+      btn.replaceWith(clone);
+    
+      // ?댁젣遺?곕뒗 ?곕━ 履??몃뱾?щ쭔 ?곌껐?섎㈃ ??踰??ㅽ뻾 ????      window.__WBP_GET_EXPORT_BUTTON__ = () => document.getElementById('btnExportAll');
+    })();
+    </script>
+  
+    <!-- === WBP Export/Import (?덈Ц???쒖떇 ?ы븿) === -->
+    <script>
+    window.addEventListener('DOMContentLoaded', function(){
+      // ?대낫??濡쒖뺄?ㅽ넗由ъ? ???꾪꽣: ?곕━ ???ㅼ엫?ㅽ럹?댁뒪 + 諛섎뱶???ы븿?댁빞 ?섎뒗 ??      const EXPORT_PREFIXES = ['wbps.', 'WBP.', 'wbp.'];   // ?ㅼ엫?ㅽ럹?댁뒪 ?꾨━?쎌뒪
+      const MUST_KEYS = [
+        'wbps.versefmt.v2',            // ???덈Ц???쒖떇留?        'wbps.sermons.v4',              // ?ㅺ탳 紐⑸줉
+        'wbps.ctx.unit.v1',             // ?⑥쐞?깃꼍??留λ씫
+        'wbps.ctx.whole.v1',            // ?꾩껜?깃꼍??留λ씫
+        'wbps.ctx.comm.v1',             // 二쇱꽍
+        'wbps.ctx.summary.v1'           // ?댁슜?먮쫫 ?붿빟
+      ];
+    
+      function isOurKey(k){
+        return EXPORT_PREFIXES.some(p=> k.startsWith(p)) || MUST_KEYS.includes(k);
+      }
+    
+      function collectAll(){
+        const out = {};
+        for(let i=0;i<localStorage.length;i++){
+          const k = localStorage.key(i);
+          if(!isOurKey(k)) continue;
+          if (typeof loadState === 'function') {
+            out[k] = loadState(k, null);
+          } else {
+            const raw = localStorage.getItem(k);
+            try{ out[k] = JSON.parse(raw); } catch{ out[k] = raw; }
+          }
+        }
+        return out;
+      }
+    
+      function downloadJSON(obj, name){
+        const blob = new Blob([JSON.stringify(obj,null,2)], {type:'application/json'});
+        const a = document.createElement('a');
+        const t = new Date();
+        const fname = name || `wbp-export-${t.getFullYear()}${String(t.getMonth()+1).padStart(2,'0')}${String(t.getDate()).padStart(2,'0')}-${String(t.getHours()).padStart(2,'0')}${String(t.getMinutes()).padStart(2,'0')}${String(t.getSeconds()).padStart(2,'0')}.json`;
+        a.href = URL.createObjectURL(blob);
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      }
+    
+      // === ?대낫?닿린 踰꾪듉 ===
+  const btnExport = (window.__WBP_GET_EXPORT_BUTTON__?.() || document.getElementById('btnExportAll'));
+  function handleExportClick(e){
+    e.preventDefault();
+    e.stopImmediatePropagation();  // ?뱀떆 ?⑥븘?덈뒗 ?ㅻⅨ 由ъ뒪?덇? ??諛쏆? 紐삵븯寃?    const payload = {
+      __type: 'WBP_EXPORT',
+      __version: '3.5',
+      __createdAt: new Date().toISOString(),
+      data: collectAll()
+    };
+    downloadJSON(payload);
+  }
+  // 以묐났 諛⑹?: data-boundExport 泥댄겕
+  if (btnExport && btnExport.dataset.boundExport !== '2') {
+    btnExport.addEventListener('click', handleExportClick, {capture:true});
+    btnExport.dataset.boundExport = '2';
+  }
+
+  // === 媛?몄삤湲?踰꾪듉/?뚯씪 ===
+  const btnImport = document.getElementById('btnImportAll');
+  const fileInp   = document.getElementById('importFile');
+  btnImport?.addEventListener('click', ()=> fileInp?.click());
+  fileInp?.addEventListener('change', (e)=>{
+    const f = e.target.files?.[0];
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = () =>{
+      try{
+        const json = JSON.parse(String(reader.result||'{}'));
+        const bag = json.data || json;
+        let count = 0;
+        for(const [k,v] of Object.entries(bag)){
+          if(!k) continue;
+          if (typeof saveState === 'function') {
+            saveState(k, v);
+          } else {
+            localStorage.setItem(k, typeof v==='string' ? v : JSON.stringify(v));
+          }
+          count++;
+        }
+        alert(`媛?몄삤湲??꾨즺: ${count}媛???ぉ??蹂듭썝?덉뒿?덈떎.`);
+        document.dispatchEvent(new CustomEvent('wbp:importApplied'));
+        document.dispatchEvent(new CustomEvent('wbp:treeBuilt'));
+      }catch(err){
+        console.error(err);
+        alert('媛?몄삤湲??ㅽ뙣: JSON ?뚯떛 ?ㅻ쪟');
+      }finally{
+        e.target.value = '';
+      }
+    };
+    reader.readAsText(f, 'utf-8');
+  });
+});
+</script>
+
+
+</body>
+</html>
