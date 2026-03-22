@@ -1612,16 +1612,45 @@ async function apiJSON(path){
   return await res.json();
 }
 async function bootstrapBibleIndex(){
-  const data = await apiJSON('/api/books');
-  BIBLE = createEmptyBibleState();
-  BIBLE.bookOrder = (data.books || []).map(item => item.book);
-  (data.books || []).forEach(item => {
-    BIBLE.books[item.book] = {
-      _loaded:false,
-      _chapterOrder:Array.from({ length: Number(item.chapter_count) || 0 }, (_, i) => i + 1)
-    };
-  });
-  syncBibleGlobal();
+  try {
+    const data = await apiJSON('/api/books');
+    BIBLE = createEmptyBibleState();
+    BIBLE.bookOrder = (data.books || []).map(item => item.book);
+    (data.books || []).forEach(item => {
+      BIBLE.books[item.book] = {
+        _loaded:false,
+        _chapterOrder:Array.from({ length: Number(item.chapter_count) || 0 }, (_, i) => i + 1)
+      };
+    });
+    syncBibleGlobal();
+  } catch (_) {
+    let raw = null;
+    try {
+      raw = await tryFetchJSON('bible-paragraphs.json');
+    } catch(_) {
+      raw = await tryFetchJSON('bible_paragraphs.json');
+    }
+    BIBLE = createEmptyBibleState();
+    const books = raw?.books || {};
+    BIBLE.bookOrder = Object.keys(books);
+    BIBLE.meta = raw?.meta || {};
+    BIBLE.bookOrder.forEach(bookName => {
+      const chapters = books[bookName] || {};
+      const chapterOrder = Object.keys(chapters).map(n => parseInt(n, 10)).sort((a, b) => a - b);
+      BIBLE.books[bookName] = { _loaded:true, _chapterOrder:chapterOrder };
+      chapterOrder.forEach(chap => {
+        const chapterData = chapters[String(chap)] || {};
+        BIBLE.books[bookName][chap] = {
+          chapter: chap,
+          title: chapterData.title || '',
+          paraCount: Array.isArray(chapterData.paras) ? chapterData.paras.length : 0,
+          paras: Array.isArray(chapterData.paras) ? chapterData.paras : [],
+          _loaded: true
+        };
+      });
+    });
+    syncBibleGlobal();
+  }
 }
 async function ensureBookChaptersLoaded(bookName){
   const bookState = ensureBookState(bookName);
