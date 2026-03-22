@@ -410,7 +410,7 @@
 </head>
 <body>
   <header>
-    <h1>Web Bible Paragraph 3.5</h1>
+    <h1>Web Bible Paragraph 4.0</h1>
 
     <div class="pill"><button id="btnSaveJSON">JSON 저장</button></div>
 
@@ -487,7 +487,7 @@
   <!-- 앱 본체 -->
   <script src="app.js" defer></script>
 
-  <!-- v3.5 코어: 1) 저장소 -->
+  <!-- v4.0 코어: 1) 저장소 -->
   <script>
   const WBP_FMT_KEY = 'wbps.versefmt.v2';
   const WBP_FMT = {
@@ -540,7 +540,7 @@
   WBP_FMT.load();
   </script>
 
-  <!-- v3.5 코어: 2) 렌더 완료 복원 + 백업 옵저버 -->
+  <!-- v4.0 코어: 2) 렌더 완료 복원 + 백업 옵저버 -->
   <script>
   // buildTree() 끝에서 app.js가 dispatch 해야 함:
   // document.dispatchEvent(new CustomEvent('wbp:treeBuilt'));
@@ -584,7 +584,7 @@
   })();
   </script>
 
-  <!-- v3.5 코어: 3) 플로팅툴바 표시/적용 즉시 저장 + 6색 팔레트 -->
+  <!-- v4.0 코어: 3) 플로팅툴바 표시/적용 즉시 저장 + 6색 팔레트 -->
   <script>
   (function enableFloatingToolbar(){
     const bar = document.getElementById('wbp-plbar');
@@ -790,7 +790,7 @@
   })();
   </script>
 
-  <!-- v3.5 코어: 4) 단락 서식 초기화 버튼 + filled 상태 토글 -->
+  <!-- v4.0 코어: 4) 단락 서식 초기화 버튼 + filled 상태 토글 -->
   <script>
   // 버튼 filled 상태 갱신(내용흐름/단위/전체/주석/설교)
   (function filledStatePatch(){
@@ -955,7 +955,7 @@
     e.stopImmediatePropagation();  // 혹시 남아있는 다른 리스너가 또 받지 못하게
     const payload = {
       __type: 'WBP_EXPORT',
-      __version: '3.5',
+      __version: '4.0',
       __createdAt: new Date().toISOString(),
       data: collectAll()
     };
